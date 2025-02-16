@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getStaticPosts } from '@/utils/server-posts';
+import { postCache } from '@/utils/post-cache';
 
 export async function GET(request: Request) {
   try {
+    await postCache.initialize();
+    
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
     const featured = searchParams.get('featured');
 
-    const allPosts = await getStaticPosts();
+    const allPosts = postCache.getPosts();
     const now = new Date().toISOString();
     const publishedPosts = allPosts.filter(post => {
       if (post.draft) return false;
