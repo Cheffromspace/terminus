@@ -1,24 +1,24 @@
 'use client';
 
 import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
-import type { ThemeContextValue, ThemeName, Theme } from '@/types/theme';
-import { tokyoNight, gruvboxDark, gruvboxLight, oneDark } from '@/themes';
-import styles from '@/styles/theme.module.css';
+import type { ThemeContextValue, ThemeName, Theme } from '../types/theme';
+import { tokyoNight, gruvboxDark, gruvboxLight, oneDark } from '../themes';
+import styles from '../styles/theme.module.css';
 
 const themes: Record<ThemeName, Theme> = {
   'tokyo-night': tokyoNight,
   'gruvbox-dark': gruvboxDark,
   'gruvbox-light': gruvboxLight,
-  'one-dark': oneDark,
+  'one-dark': oneDark
 };
 
 const getInitialTheme = (): Theme => {
   if (typeof window === 'undefined') return tokyoNight;
-  
+
   try {
     const stored = localStorage.getItem('preferred-theme') as ThemeName;
     if (stored && stored in themes) return themes[stored];
-    
+
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     return systemDark ? tokyoNight : gruvboxLight;
   } catch {
@@ -48,8 +48,8 @@ export const useThemeContext = () => {
   return context;
 };
 
-export function ThemeProvider({ 
-  children,
+export function ThemeProvider({
+  children
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
