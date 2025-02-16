@@ -23,6 +23,7 @@
     "src/components/**/*",
     "src/contexts/**/*",
     "src/hooks/**/*",
+    "src/styles/**/*",
     "src/themes/**/*",
     "src/types/**/*",
     "src/utils/**/*",
