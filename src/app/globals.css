@@ -5,9 +5,20 @@
 /* Base theme variables are now managed by theme.module.css */
 @layer base {
   :root {
+    /* Layout variables */
     --sidebar-width: 18rem; /* 72 / 4 = 18rem */
     --sidebar-visible: 1;
     color-scheme: light dark;
+
+    /* Theme transition timing */
+    --theme-transition-duration: 200ms;
+    --theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Theme transition properties */
+    --theme-transition-props: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+                            color var(--theme-transition-duration) var(--theme-transition-timing),
+                            border-color var(--theme-transition-duration) var(--theme-transition-timing),
+                            box-shadow var(--theme-transition-duration) var(--theme-transition-timing);
   }
 }
 
@@ -263,6 +274,10 @@ a:hover {
 
 /* Accessibility improvements */
 @media (prefers-reduced-motion) {
+  :root {
+    --theme-transition-duration: 0ms;
+  }
+  
   * {
     animation: none !important;
     transition: none !important;

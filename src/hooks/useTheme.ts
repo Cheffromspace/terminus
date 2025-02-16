@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useLayoutEffect } from 'react'
+import { useState, useCallback, useLayoutEffect } from 'react'
 import type { Theme, ThemeName } from '@/types/theme'
 import { getTheme, getDefaultTheme, isValidTheme, getAvailableThemes } from '@/themes'
 
@@ -23,15 +23,7 @@ const getInitialTheme = (): Theme => {
 
 export const useTheme = () => {
   const [currentTheme, setCurrentTheme] = useState<Theme>(getInitialTheme)
-  const [isLoading, setIsLoading] = useState(false)
-
-  // Get system color scheme preference
-  const getSystemTheme = useCallback((): ThemeName => {
-    if (typeof window === 'undefined') return 'tokyo-night'
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'tokyo-night'
-      : 'gruvbox-light'
-  }, [])
+  const [isLoading] = useState(false)
 
   // Apply theme to document
   const applyTheme = useCallback((theme: Theme) => {
@@ -58,7 +50,6 @@ export const useTheme = () => {
 
   // Sync with system preferences
   useLayoutEffect(() => {
-
     // Apply theme immediately
     applyTheme(currentTheme)
 
@@ -74,7 +65,7 @@ export const useTheme = () => {
 
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [currentTheme])
+  }, [currentTheme, applyTheme])
 
   return {
     currentTheme,
