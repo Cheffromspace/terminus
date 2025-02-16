@@ -1,0 +1,26 @@
+/* Critical CSS that gets inlined */
+:root {
+  background-color: var(--background) !important;
+  color-scheme: dark light;
+}
+
+html {
+  background-color: var(--background) !important;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--background) !important;
+}
+
+/* Prevent flash of incorrect theme */
+[data-theme] * {
+  transition: none !important;
+}
+
+/* Re-enable transitions after theme is loaded */
+[data-theme].theme-loaded * {
+  transition: background-color 0.2s ease-in-out,
+              color 0.2s ease-in-out,
+              border-color 0.2s ease-in-out !important;
+}
