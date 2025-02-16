@@ -40,5 +40,33 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+logs/
+*.log
+
+# Build output
+/dist/
+/lib/
+
 # Local content
 /local/
+
+# Content directory (except test files)
+content/
+!content/posts/test-html-features.md
+!content/posts/test-markdown-features.md
+!content/posts/test-mermaid.md
+!content/posts/test-post.md
+!content/posts/datacloud-devops.md

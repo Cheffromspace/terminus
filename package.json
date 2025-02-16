@@ -19,12 +19,19 @@
     "react",
     "typescript"
   ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:lib": "tsc --project tsconfig.lib.json",
     "start": "next start",
     "lint": "next lint",
-    "migrate-posts": "ts-node scripts/migrate-posts.ts"
+    "migrate-posts": "ts-node scripts/migrate-posts.ts",
+    "prepare": "npm run build:lib"
   },
   "dependencies": {
     "@codemirror/commands": "^6.8.0",
