@@ -10,7 +10,7 @@ interface PostUpdaterProps {
   nextPost: Post | null;
 }
 
-export function PostUpdater({ currentPost, previousPost, nextPost }: PostUpdaterProps) {
+function PostUpdater({ currentPost, previousPost, nextPost }: PostUpdaterProps) {
   const { setCurrentPost, setPreviousPost, setNextPost } = usePost();
 
   useEffect(() => {
@@ -22,3 +22,6 @@ export function PostUpdater({ currentPost, previousPost, nextPost }: PostUpdater
   // This component doesn't render anything
   return null;
 }
+
+export { PostUpdater };
+export default PostUpdater;

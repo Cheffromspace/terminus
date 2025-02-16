@@ -14,7 +14,7 @@ interface PostContextType {
   setAllPosts: (posts: Post[]) => void;
 }
 
-const PostContext = createContext<PostContextType | null>(null);
+export const PostContext = createContext<PostContextType | null>(null);
 
 export function PostProvider({
   children,

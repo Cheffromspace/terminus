@@ -124,7 +124,7 @@ function rehypeCodeLanguage() {
   };
 }
 
-export function MarkdownRenderer({ content, frontmatter, className = '' }: MarkdownRendererProps): React.ReactElement {
+export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, frontmatter, className = '' }): React.ReactElement => {
   const codeBlockStyle = `
     .code-block-wrapper {
       position: relative;
@@ -174,7 +174,7 @@ export function MarkdownRenderer({ content, frontmatter, className = '' }: Markd
           </div>
         );
       }
-      
+
       // Handle grid container
       if (style?.display === 'grid') {
         return (
@@ -384,4 +384,6 @@ export function MarkdownRenderer({ content, frontmatter, className = '' }: Markd
       </div>
     </>
   );
-}
+};
+
+export default MarkdownRenderer;

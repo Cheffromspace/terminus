@@ -13,7 +13,7 @@ export {
 } from './utils/server-posts';
 
 // Types
-export type { Post, Series } from './types/post';
+export type { Post, Series } from './types/blog';
 
 // Contexts
 export { PostContext, PostProvider } from './contexts/PostContext';
