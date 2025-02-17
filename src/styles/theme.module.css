@@ -2,6 +2,7 @@
 .theme {
   /* Base colors */
   --background: var(--theme-background);
+  --background-muted: var(--theme-backgroundMuted);
   --foreground: var(--theme-foreground);
   --cursor: var(--theme-cursor);
   --selection: var(--theme-selection);

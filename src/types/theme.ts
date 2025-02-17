@@ -3,6 +3,7 @@ export type ThemeName = 'tokyo-night' | 'gruvbox-dark' | 'gruvbox-light' | 'one-
 export interface ThemePalette {
   // Base colors
   background: string
+  backgroundMuted: string
   foreground: string
   cursor: string
   selection: string

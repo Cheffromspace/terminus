@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './template.css';
 import './globals.css';
-import styles from '@/styles/theme.module.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ClientSidebar } from '@/components/ClientSidebar';
 import { PostProvider } from '@/contexts/PostContext';
@@ -31,7 +30,7 @@ export default async function RootLayout({
       <head>
         <meta name="color-scheme" content="light dark" />
       </head>
-      <body className={`${inter.className} antialiased ${styles.theme}`}>
+      <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <PostProvider initialAllPosts={allPosts}>
             <div className="flex min-h-screen">

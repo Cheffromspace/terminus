@@ -11,6 +11,7 @@ export const tokyoNight: Theme = {
   palette: {
     // Base colors
     background: '#1a1b26',
+    backgroundMuted: '#1f2335',
     foreground: '#a9b1d6',
     cursor: '#c0caf5',
     selection: '#33467c',

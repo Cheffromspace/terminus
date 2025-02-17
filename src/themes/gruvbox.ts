@@ -11,6 +11,7 @@ export const gruvboxDark: Theme = {
   palette: {
     // Base colors
     background: '#282828',
+    backgroundMuted: '#32302f',
     foreground: '#ebdbb2',
     cursor: '#ebdbb2',
     selection: '#504945',
@@ -62,6 +63,7 @@ export const gruvboxLight: Theme = {
   palette: {
     // Base colors
     background: '#fbf1c7',
+    backgroundMuted: '#f2e5bc',
     foreground: '#3c3836',
     cursor: '#282828',
     selection: '#d5c4a1',

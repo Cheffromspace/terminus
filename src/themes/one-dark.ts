@@ -11,6 +11,7 @@ export const oneDark: Theme = {
   palette: {
     // Base colors
     background: '#282c34',
+    backgroundMuted: '#2c313a',
     foreground: '#abb2bf',
     cursor: '#528bff',
     selection: '#3e4451',

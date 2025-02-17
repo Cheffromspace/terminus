@@ -96,7 +96,7 @@ export function ThemeProvider({
         availableThemes: Object.values(themes).map(theme => theme.metadata)
       }}
     >
-      <>
+      <div className={styles.theme}>
         {children}
         <div className={styles.themeSelector}>
           <div className={styles.themePreview} style={{ backgroundColor: currentTheme.palette.background }} />
@@ -113,7 +113,7 @@ export function ThemeProvider({
             ))}
           </select>
         </div>
-      </>
+      </div>
     </ThemeContext.Provider>
   );
 }
