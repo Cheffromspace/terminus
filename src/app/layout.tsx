@@ -9,12 +9,13 @@ import { PostProvider } from '@/contexts/PostContext';
 import { getStaticPosts } from '@/utils/server-posts';
 import { HomeButton } from '@/components/HomeButton';
 import { tokyoNight } from '@/themes';
+import Link from 'next/link';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'TechStack Chronicles',
-  description: 'A technical blog exploring cloud, data, DevOps, and beyond - with vim-style navigation',
+  title: 'Jon Flatt',
+  description: 'DevOps engineer writing about tooling, automation, and AI-assisted development',
 };
 
 export default async function RootLayout({
@@ -39,8 +40,15 @@ export default async function RootLayout({
                 <header className="border-b border-[var(--border)] py-4">
                   <nav className="container mx-auto px-4">
                     <div className="flex items-center justify-between">
-                      <div className="text-sm text-[var(--comment)]">
-                        Press ? for keyboard shortcuts
+                      <div className="flex items-center gap-4">
+                        <div className="text-sm text-[var(--comment)]">
+                          Press ? for keyboard shortcuts
+                        </div>
+                        <nav className="flex gap-4">
+                          <Link href="/about" className="hover:text-[var(--accent)]">About</Link>
+                          <Link href="/projects" className="hover:text-[var(--accent)]">Projects</Link>
+                          <Link href="/posts" className="hover:text-[var(--accent)]">Blog</Link>
+                        </nav>
                       </div>
                     </div>
                   </nav>
