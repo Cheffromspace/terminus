@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './template.css';
+import '../styles/template.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ClientSidebar } from '@/components/ClientSidebar';

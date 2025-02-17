@@ -1,6 +1,6 @@
 {
   "name": "terminus-blog-engine",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "A hyper-fast, GPU-accelerated blog engine with Vim-like navigation and zero-compromise accessibility",
   "private": false,
   "license": "MIT",
