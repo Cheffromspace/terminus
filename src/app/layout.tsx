@@ -14,7 +14,7 @@ import Link from 'next/link';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Jon Flatt',
+  title: 'Jonathan Flatt',
   description: 'DevOps engineer writing about tooling, automation, and AI-assisted development',
 };
 

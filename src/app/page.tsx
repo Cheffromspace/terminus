@@ -11,7 +11,7 @@ export default async function Home(): Promise<React.ReactElement> {
       {/* Hero Section */}
       <section className="mb-16">
         <h1 className="text-5xl font-bold mb-6">
-          Hi, I&apos;m Jon Flatt
+          Hi, I&apos;m Jonathan Flatt
         </h1>
         <p className="text-xl text-[var(--comment)] mb-8">
           I&apos;m a DevOps engineer crafting bespoke tools and automation solutions.
