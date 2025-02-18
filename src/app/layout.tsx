@@ -1,22 +1,22 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import '../styles/template.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ClientSidebar } from '@/components/ClientSidebar';
 import { PostProvider } from '@/contexts/PostContext';
 import { getStaticPosts } from '@/utils/server-posts';
 import { HomeButton } from '@/components/HomeButton';
-import { tokyoNight } from '@/themes';
 import Link from 'next/link';
 
 const inter = Inter({ subsets: ['latin'] });
+
 
 export const metadata: Metadata = {
   title: 'Jonathan Flatt',
   description: 'DevOps engineer writing about tooling, automation, and AI-assisted development',
 };
+
 
 export default async function RootLayout({
   children,
@@ -24,14 +24,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }): Promise<React.ReactElement> {
   const allPosts = await getStaticPosts();
-  const defaultTheme = tokyoNight;
-
   return (
-    <html lang="en" data-theme={defaultTheme.metadata.name}>
+    <html lang="en">
       <head>
         <meta name="color-scheme" content="light dark" />
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.className} antialiased`} style={{ '--sidebar-visible': '1' } as React.CSSProperties}>
         <ThemeProvider>
           <PostProvider initialAllPosts={allPosts}>
             <div className="flex min-h-screen">

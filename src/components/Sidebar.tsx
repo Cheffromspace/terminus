@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { FixedSizeList as List } from 'react-window';
 import type { Post } from '@/types/blog';
 import { KeyboardNavigation } from '@/components/KeyboardNavigation';
+import type { NavigationItem } from '@/types/navigation';
 
 interface SidebarProps {
-  currentPost: Post;
-  allPosts: Post[];
+  currentPost?: Post;
+  allPosts?: Post[];
+  navigationItems?: NavigationItem[];
   className?: string;
   defaultVisible?: boolean;
   onVisibilityChange?: (visible: boolean) => void;
@@ -69,13 +71,18 @@ PostItem.displayName = 'PostItem';
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   currentPost, 
-  allPosts, 
+  allPosts,
+  navigationItems = [],
   className,
   defaultVisible = true,
   onVisibilityChange
 }) => {
   const [isHelpVisible, setIsHelpVisible] = useState(false);
-  const [isSidebarVisible, setIsSidebarVisible] = useState(defaultVisible);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+  useEffect(() => {
+    setIsSidebarVisible(defaultVisible);
+  }, [defaultVisible]);
 
   useEffect(() => {
     onVisibilityChange?.(isSidebarVisible);
@@ -85,33 +92,46 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const listRef = useRef<List>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const filteredPosts = useMemo(() => {
-    if (!searchQuery) return allPosts;
-    const query = searchQuery.toLowerCase();
-    return allPosts.filter(post => 
-      post.title.toLowerCase().includes(query) || 
-      post.description.toLowerCase().includes(query) ||
-      (post.series?.name.toLowerCase().includes(query))
-    );
-  }, [allPosts, searchQuery]);
+  const items = useMemo(() => {
+    // If we have posts, create navigation items from them
+    if (allPosts?.length) {
+      const filtered = !searchQuery ? allPosts : allPosts.filter(post => 
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        post.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (post.series?.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+      
+      return filtered.map(post => ({
+        id: post.slug,
+        label: post.title,
+        href: `/posts/${post.slug}`,
+        description: post.series ? `${post.series.name} - Part ${post.series.order} of ${post.series.totalParts}` : undefined
+      }));
+    }
+    
+    // Otherwise use provided navigation items
+    if (navigationItems?.length) {
+      return !searchQuery ? navigationItems : navigationItems.filter(item =>
+        item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
 
-  const navigationItems = useMemo(() => {
-    return filteredPosts.map(post => ({
-      id: post.slug,
-      label: post.title,
-      href: `/posts/${post.slug}`,
-    }));
-  }, [filteredPosts]);
+    return [];
+  }, [allPosts, navigationItems, searchQuery]);
 
   const handleItemFocus = (index: number) => {
     listRef.current?.scrollToItem(index, 'smart');
   };
 
   // Calculate current index and initial scroll position
-  const { currentIndex, initialScrollIndex } = useMemo(() => ({
-    currentIndex: filteredPosts.findIndex(post => post.slug === currentPost.slug),
-    initialScrollIndex: filteredPosts.findIndex(post => post.slug === currentPost.slug)
-  }), [filteredPosts, currentPost.slug]);
+  const { currentIndex, initialScrollIndex } = useMemo(() => {
+    if (currentPost && allPosts) {
+      const idx = items.findIndex(item => item.id === currentPost.slug);
+      return { currentIndex: idx, initialScrollIndex: idx };
+    }
+    return { currentIndex: 0, initialScrollIndex: 0 };
+  }, [items, currentPost]);
 
   // Initialize scroll position
   useEffect(() => {
@@ -162,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`fixed left-0 top-0 h-screen w-72 bg-[var(--background)] border-r border-[var(--border)] transform transition-transform duration-150 ease-out ${
         isSidebarVisible ? 'translate-x-0' : '-translate-x-72'
       } ${className || ''}`}
-      aria-label="Blog navigation"
+      aria-label="Site navigation"
     >
       {/* Skip Link */}
       <a
@@ -200,24 +220,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <input
             ref={searchInputRef}
             type="search"
-            placeholder="Search posts... (Press / to focus)"
+            placeholder="Search navigation... (Press / to focus)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onBlur={() => setIsSearching(false)}
             className="w-full px-3 py-2 text-sm bg-[var(--background-muted)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--link)] text-[var(--foreground)]"
-            aria-label="Search posts"
+            aria-label="Search navigation items"
           />
           {searchQuery && (
             <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-[var(--comment)]">
-              {filteredPosts.length} results
+              {items.length} results
             </div>
           )}
         </div>
 
-        {/* Posts List */}
+        {/* Navigation List */}
         <div className="flex-1 min-h-0">
           <h3 className="text-sm font-semibold mb-3 text-[var(--comment)] uppercase tracking-wider flex items-center justify-between">
-            <span>All Posts</span>
+            <span>{allPosts?.length ? 'Blog Posts' : 'Navigation'}</span>
             <button
               onClick={() => setIsHelpVisible(true)}
               className="text-xs font-normal normal-case text-[var(--comment)] hover:text-[var(--foreground)]"
@@ -228,38 +248,70 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </h3>
           <div 
             role="listbox"
-            aria-label="Blog posts"
+            aria-label="Navigation items"
             className="h-full"
             tabIndex={0}
           >
-            <List
-              ref={listRef}
-              height={600}
-              itemCount={filteredPosts.length}
-              itemSize={ITEM_HEIGHT + ITEM_PADDING}
-              width="100%"
-              itemData={{
-                posts: filteredPosts,
-                currentPost,
-                onItemFocus: handleItemFocus,
-              }}
-            >
-              {PostItem}
-            </List>
+          <List
+            ref={listRef}
+            height={600}
+            itemCount={items.length}
+            itemSize={ITEM_HEIGHT + ITEM_PADDING}
+            width="100%"
+          >
+            {({ index, style }) => {
+              const item = items[index];
+              const isSelected = currentPost ? item.id === currentPost.slug : false;
+
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  data-nav-item={index}
+                  role="option"
+                  aria-selected={isSelected}
+                  onFocus={() => handleItemFocus(index)}
+                  className={`block px-3 py-2 text-sm rounded-md transition-all duration-200 ease-in-out min-h-[${ITEM_HEIGHT}px] focus:outline-none focus:ring-2 focus:ring-[var(--link)] focus-visible:ring-2 focus-visible:ring-[var(--link)] ${
+                    isSelected
+                      ? 'bg-[var(--selection)] text-[var(--foreground)] shadow-sm font-medium'
+                      : 'hover:bg-[var(--background-muted)] bg-transparent'
+                  }`}
+                  style={{
+                    ...style,
+                    top: `${parseFloat(style.top as string) + ITEM_PADDING}px`,
+                    contain: 'content',
+                  }}
+                >
+                  <span className="line-clamp-2">
+                    {item.label}
+                    {item.description && (
+                      <span className="block text-xs text-[var(--comment)] mt-0.5">
+                        {item.description}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              );
+            }}
+          </List>
           </div>
         </div>
       </div>
 
       {/* Live Region for Announcements */}
       <div className="sr-only" role="status" aria-live="polite">
-        {searchQuery ? `${filteredPosts.length} posts found` : `${currentPost.title} - ${currentIndex + 1} of ${filteredPosts.length} posts`}
+        {searchQuery 
+          ? `${items.length} items found` 
+          : currentPost 
+            ? `${currentPost.title} - ${currentIndex + 1} of ${items.length} items`
+            : `${items.length} navigation items`}
       </div>
     </nav>
   );
 
   return (
     <>
-      <KeyboardNavigation navigationItems={navigationItems}>
+      <KeyboardNavigation navigationItems={items}>
         {sidebarContent}
       </KeyboardNavigation>
 
@@ -275,23 +327,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <dl className="space-y-2 text-[var(--foreground)]">
               <div className="flex justify-between">
                 <dt className="font-mono">Shift + J/K</dt>
-                <dd>Navigate posts</dd>
+                <dd>Navigate items</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="font-mono">Enter</dt>
-                <dd>Open selected post</dd>
+                <dd>Open selected item</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="font-mono">g g</dt>
-                <dd>Go to first post</dd>
+                <dd>Go to first item</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="font-mono">Shift + G</dt>
-                <dd>Go to last post</dd>
+                <dd>Go to last item</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="font-mono">/</dt>
-                <dd>Search posts (Esc to clear)</dd>
+                <dd>Search items (Esc to clear)</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="font-mono">`</dt>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
-import type { ThemeContextValue, ThemeName, Theme } from '../types/theme';
+import type { ThemeContextValue, ThemeName, Theme, ThemePalette } from '../types/theme';
 import { tokyoNight, gruvboxDark, gruvboxLight, oneDark } from '../themes';
 import styles from '../styles/theme.module.css';
 
@@ -13,8 +13,11 @@ const themes: Record<ThemeName, Theme> = {
 };
 
 const getInitialTheme = (): Theme => {
-  if (typeof window === 'undefined') return tokyoNight;
+  // Always return tokyo-night for initial SSR to prevent hydration mismatch
+  return tokyoNight;
+};
 
+const getClientTheme = (): Theme => {
   try {
     const stored = localStorage.getItem('preferred-theme') as ThemeName;
     if (stored && stored in themes) return themes[stored];
@@ -26,14 +29,34 @@ const getInitialTheme = (): Theme => {
   }
 };
 
+// Define critical color keys
+type CriticalColorKey = 'background' | 'foreground' | 'link';
+const criticalColors: CriticalColorKey[] = ['background', 'foreground', 'link'];
+
 const applyTheme = (theme: Theme) => {
   const root = document.documentElement;
-  root.setAttribute('data-theme', theme.metadata.name);
-  Object.entries(theme.palette).forEach(([key, value]) => {
-    root.style.setProperty(`--${key}`, value);
-    // Also set the theme- prefixed version for backward compatibility
-    root.style.setProperty(`--theme-${key}`, value);
+  
+  // Set loading state
+  root.setAttribute('data-theme-loading', 'true');
+  
+  // Apply critical colors immediately
+  criticalColors.forEach(key => {
+    const value = theme.palette[key];
+      root.style.setProperty(`--${String(key)}`, value);
+      root.style.setProperty(`--theme-${String(key)}`, value);
   });
+
+  // Apply remaining theme properties
+  (Object.entries(theme.palette) as [keyof ThemePalette, string][]).forEach(([key, value]) => {
+    if (!criticalColors.includes(key as CriticalColorKey)) {
+      root.style.setProperty(`--${key}`, value);
+      root.style.setProperty(`--theme-${key}`, value);
+    }
+  });
+
+  // Update theme name and remove loading state
+  root.setAttribute('data-theme', theme.metadata.name);
+  root.removeAttribute('data-theme-loading');
 };
 
 // Create theme context
@@ -56,11 +79,18 @@ export function ThemeProvider({
   const [currentTheme, setCurrentTheme] = useState<Theme>(getInitialTheme);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Apply theme on mount and handle system preference changes
+  // Initialize theme and handle system preference changes
   useLayoutEffect(() => {
-    applyTheme(currentTheme);
+    // First apply the client's preferred theme
+    const clientTheme = getClientTheme();
+    if (clientTheme.metadata.name !== currentTheme.metadata.name) {
+      setCurrentTheme(clientTheme);
+      applyTheme(clientTheme);
+    } else {
+      applyTheme(currentTheme);
+    }
+    
     setIsInitialized(true);
-    // Add theme-loaded class after initialization
     document.documentElement.classList.add('theme-loaded');
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -74,7 +104,7 @@ export function ThemeProvider({
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [currentTheme]);
+  }, []);
 
   const setTheme = (themeName: ThemeName) => {
     const newTheme = themes[themeName];
@@ -84,7 +114,15 @@ export function ThemeProvider({
   };
 
   if (!isInitialized) {
-    return <div style={{ visibility: 'hidden' }}>{children}</div>;
+    // Apply critical theme variables inline for immediate effect
+    const criticalStyle = {
+      visibility: 'hidden',
+      '--background': currentTheme.palette.background,
+      '--foreground': currentTheme.palette.foreground,
+      '--link': currentTheme.palette.link,
+    } as React.CSSProperties;
+    
+    return <div style={criticalStyle}>{children}</div>;
   }
 
   return (

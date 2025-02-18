@@ -1,0 +1,70 @@
+@tailwind components;
+
+@layer components {
+  /* Code blocks */
+  code:not([class*="language-"]) {
+    background-color: var(--background-muted);
+    color: var(--foreground);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.9em;
+  }
+
+  /* Navigation focus indicator */
+  .nav-focus-indicator {
+    @apply ring-2 ring-[var(--link)] ring-offset-2 !important;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: .8;
+    }
+  }
+
+  /* Custom elements */
+  .custom-box {
+    background-color: var(--background-muted);
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+    contain: layout style;
+  }
+
+  .grid-item {
+    background-color: var(--background-muted);
+    padding: 1rem;
+    border-radius: 4px;
+    contain: layout style;
+  }
+
+  .click-me {
+    background-color: var(--link);
+    color: var(--background);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    contain: layout style;
+  }
+
+  .click-me:hover {
+    opacity: 0.9;
+  }
+
+  /* Navigation buttons */
+  .nav-button {
+    contain: layout style;
+    will-change: opacity, background-color;
+  }
+
+  /* Theme selector */
+  .theme-selector {
+    contain: layout style;
+    will-change: transform;
+  }
+}

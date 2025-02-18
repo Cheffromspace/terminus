@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkGfm from 'remark-gfm';
 import { visit } from 'unist-util-visit';
 import mermaid from 'mermaid';
@@ -48,7 +49,8 @@ interface MarkdownRendererProps {
 // Mermaid renderer component
 function MermaidRenderer({ chart }: { chart: string }) {
   const elementRef = useRef<HTMLDivElement>(null);
-  const chartId = useRef(`mermaid-${Math.random().toString(36).substr(2, 9)}`);
+  // Use a stable ID based on the chart content
+  const chartId = useRef(`mermaid-${Buffer.from(chart).toString('base64').slice(0, 8)}`);
 
   useEffect(() => {
     if (elementRef.current) {
@@ -77,7 +79,10 @@ function MermaidRenderer({ chart }: { chart: string }) {
   return (
     <div 
       ref={elementRef}
-      className="my-4 p-4 bg-[rgb(30,41,59)] rounded-lg overflow-auto"
+      className="my-4 p-4 rounded-lg overflow-auto"
+      style={{
+        backgroundColor: 'var(--background-muted)'
+      }}
     />
   );
 }
@@ -125,26 +130,17 @@ function rehypeCodeLanguage() {
 }
 
 export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, frontmatter, className = '' }): React.ReactElement => {
-  const codeBlockStyle = `
-    .code-block-wrapper {
-      position: relative;
-      max-width: fit-content;
-    }
-    .code-language {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background-color: rgb(40, 51, 69);
-      color: #94a3b8;
-      font-size: 0.75rem;
-      padding: 0.25rem 0.75rem;
-      border-bottom-right-radius: 0.375rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
-    .hljs {
-      background-color: rgb(30, 41, 59) !important;
-    }
-  `;
+// Extended sanitize schema to allow specific HTML attributes
+const sanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    div: [...(defaultSchema.attributes?.div || []), 'className', 'style'],
+    code: [...(defaultSchema.attributes?.code || []), 'className'],
+    span: [...(defaultSchema.attributes?.span || []), 'className', 'style'],
+    button: [...(defaultSchema.attributes?.button || []), 'onClick', 'style'],
+  }
+};
 
   const components: Components = {
     h1({ children, ...props }) {
@@ -163,11 +159,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, fro
             {...props}
             style={{
               ...style,
-              backgroundColor: 'hsl(235, 24%, 20%)',
-              color: 'hsl(227, 30%, 95%)',
+              backgroundColor: 'var(--background-muted)',
+              color: 'var(--foreground)',
               padding: '20px',
               borderRadius: '5px',
-              border: '1px solid hsl(234, 23%, 25%)'
+              border: '1px solid var(--border)'
             }}
           >
             {children}
@@ -198,11 +194,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, fro
           <div 
             {...props}
             style={{
-              backgroundColor: 'hsl(235, 24%, 20%)',
-              color: 'hsl(227, 30%, 95%)',
+              backgroundColor: 'var(--background-muted)',
+              color: 'var(--foreground)',
               padding: '15px',
               borderRadius: '4px',
-              border: '1px solid hsl(234, 23%, 25%)'
+              border: '1px solid var(--border)'
             }}
           >
             {children}
@@ -301,27 +297,13 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, fro
           }
         : onClick;
 
-      // Override button styles
+      // Use CSS class for primary button styles
       if (style?.backgroundColor === '#007bff') {
         return (
           <button 
             onClick={handleClick} 
             {...props}
-            style={{
-              backgroundColor: 'hsl(217, 92%, 35%)',
-              color: 'white',
-              padding: '10px 20px',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              transition: 'background-color 0.3s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = 'hsl(217, 92%, 40%)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = 'hsl(217, 92%, 35%)';
-            }}
+            className="primary-button"
           >
             {children}
           </button>
@@ -359,12 +341,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, fro
                     Date
                   </div>
                   <div className="text-[var(--foreground)] text-base leading-relaxed bg-[var(--background)] p-4 rounded-md border border-[var(--border-color)] shadow-sm font-sans">
-                    {new Intl.DateTimeFormat('en-US', {
-                      weekday: 'long',
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    }).format(new Date(String(frontmatter.date)))}
+                    {/* Ensure consistent date formatting between server and client */}
+                    {(() => {
+                      const date = new Date(String(frontmatter.date));
+                      return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`;
+                    })()}
                   </div>
                 </div>
               )}
@@ -372,11 +353,16 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, fro
           </div>
         </div>
       )}
-      <div className={`prose prose-invert max-w-none ${className}`}>
-        <style>{codeBlockStyle}</style>
+      <div className={`prose ${className} markdown-content`}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw, rehypeTransformEvents, rehypeCodeLanguage, rehypeHighlight]}
+          rehypePlugins={[
+            rehypeRaw,
+            [rehypeSanitize, sanitizeSchema],
+            rehypeTransformEvents,
+            rehypeCodeLanguage,
+            rehypeHighlight
+          ]}
           components={components}
         >
           {content}

@@ -44,13 +44,24 @@
   - ✓ Set up immutable caching for text assets
 
 #### 3. CSS Optimization
-- [ ] Optimize CSS delivery
-  - Extract and inline critical CSS
-  - Defer non-critical styles
-  - Implement CSS code splitting
-  - Remove unused CSS
+- [x] Optimize CSS delivery
+  - ✓ Extract and inline critical CSS (moved to base layer)
+  - ✓ Defer non-critical styles (components and markdown layers)
+  - ✓ Implement CSS code splitting (critical, components, markdown)
+  - ✓ Remove unused CSS (via layer system and containment)
+  
+Implementation details:
+- CSS is split into three layers:
+  1. Base layer (critical.css): Core variables, layout, and theme transitions
+  2. Components layer (components.css): UI elements and animations
+  3. Markdown layer (markdown.css): Content styling
+- Optimizations:
+  - CSS containment applied to components
+  - Theme transitions optimized to prevent flash
+  - Layer system ensures proper cascade
+  - Build-time CSS processing via copy-styles.ts
 
-### Phase 2: Runtime Optimizations
+### Phase 2: Runtime Optimizations (Next)
 
 #### 1. JavaScript Optimization
 - [ ] Implement progressive hydration

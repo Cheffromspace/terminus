@@ -1,40 +1,60 @@
 'use client';
 
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { usePost } from '@/contexts/PostContext';
 import { Sidebar } from './Sidebar';
+import type { NavigationItem } from '@/types/navigation';
 
 export function ClientSidebar() {
   const { currentPost, allPosts } = usePost();
-  const [isSidebarVisible, setIsSidebarVisible] = useState(() => {
-    if (typeof window === 'undefined') return true;
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+  useEffect(() => {
     const stored = localStorage.getItem('sidebarVisible');
-    return stored === null ? true : stored === 'true';
-  });
+    if (stored !== null) {
+      setIsSidebarVisible(stored === 'true');
+    }
+  }, []);
 
   const updateSidebarVisibility = (visible: boolean) => {
     setIsSidebarVisible(visible);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('sidebarVisible', visible.toString());
-    }
+    localStorage.setItem('sidebarVisible', visible.toString());
+    document.body.style.setProperty('--sidebar-visible', visible ? '1' : '0');
   };
 
-  // Share sidebar visibility state with layout and persist
-  useEffect(() => {
-    document.body.style.setProperty('--sidebar-visible', isSidebarVisible ? '1' : '0');
-  }, [isSidebarVisible]);
-
-  // Don't render until we have a valid current post
-  if (!currentPost || !allPosts.length) {
-    return null;
-  }
+  // Global navigation items
+  const navigationItems: NavigationItem[] = useMemo(() => [
+    {
+      id: 'home',
+      label: 'Home',
+      href: '/',
+      description: 'Welcome page'
+    },
+    {
+      id: 'about',
+      label: 'About',
+      href: '/about',
+      description: 'Learn more about me'
+    },
+    {
+      id: 'projects',
+      label: 'Projects',
+      href: '/projects',
+      description: 'View my projects'
+    },
+    {
+      id: 'blog',
+      label: 'Blog',
+      href: '/posts',
+      description: 'Read my latest posts'
+    }
+  ], []);
 
   return (
     <Sidebar
-      currentPost={currentPost}
+      currentPost={currentPost || undefined}
       allPosts={allPosts}
+      navigationItems={navigationItems}
       defaultVisible={isSidebarVisible}
       onVisibilityChange={updateSidebarVisibility}
     />
