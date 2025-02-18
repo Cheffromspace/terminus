@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useRouter } from 'next/navigation';
 import type { KeyboardNavigationProps, NavigationState, NavigationChild } from '@/types/blog';
@@ -33,20 +33,82 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
     }));
   }, []);
 
-  // Smooth scrolling with j/k
-  useHotkeys('j', () => {
-    window.scrollBy({
-      top: 100,
-      behavior: 'smooth'
-    });
-  }, { enableOnFormTags: false });
+  // GPU-accelerated smooth scrolling with j/k
+  const scrollState = useRef({
+    isScrolling: false,
+    velocity: 0,
+    lastTime: 0,
+    rafId: 0,
+    keyHoldStart: 0,
+    acceleration: 1,
+  });
 
-  useHotkeys('k', () => {
+  const smoothScroll = useCallback(() => {
+    if (!scrollState.current.isScrolling) return;
+
+    const now = performance.now();
+    scrollState.current.lastTime = now;
+
+    // Calculate hold duration and adjust acceleration
+    const holdDuration = now - scrollState.current.keyHoldStart;
+    scrollState.current.acceleration = Math.min(
+      3, // Max acceleration multiplier
+      1 + (holdDuration / 300) // Faster acceleration
+    );
+
+    // Apply acceleration to velocity
+    const scrollAmount = scrollState.current.velocity * scrollState.current.acceleration;
+
+    // Use transform: translate3d for GPU acceleration
     window.scrollBy({
-      top: -100,
-      behavior: 'smooth'
+      top: scrollAmount,
+      left: 0,
+      behavior: 'auto' // Better performance than 'smooth'
     });
-  }, { enableOnFormTags: false });
+
+    scrollState.current.rafId = requestAnimationFrame(smoothScroll);
+  }, []);
+
+  const startScroll = useCallback((direction: number) => {
+    if (!scrollState.current.isScrolling) {
+      scrollState.current.isScrolling = true;
+      scrollState.current.lastTime = performance.now();
+      scrollState.current.keyHoldStart = performance.now();
+      scrollState.current.velocity = direction * 25; // Increased base speed
+      scrollState.current.acceleration = 1;
+      smoothScroll();
+    }
+  }, [smoothScroll]);
+
+  const stopScroll = useCallback(() => {
+    scrollState.current.isScrolling = false;
+    scrollState.current.acceleration = 1;
+    if (scrollState.current.rafId) {
+      cancelAnimationFrame(scrollState.current.rafId);
+    }
+  }, []);
+
+  // Handle j/k scrolling with keydown/keyup events
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+      if (e.key === 'j' && !e.shiftKey) startScroll(1);
+      if (e.key === 'k' && !e.shiftKey) startScroll(-1);
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'j' || e.key === 'k') stopScroll();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      stopScroll();
+    };
+  }, [startScroll, stopScroll]);
 
   // Navigation with Shift+J/K
   useHotkeys('shift+j', () => {
