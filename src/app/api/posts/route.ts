@@ -1,13 +1,43 @@
 import { NextResponse } from 'next/server';
-import { postCache } from '@/utils/post-cache';
+import { postCache, PostCache } from '@/utils/post-cache';
+
+export const runtime = 'edge';
+export const preferredRegion = 'auto';
 
 export async function GET(request: Request) {
   try {
+    // Reset cache for edge runtime
+    if (process.env.NEXT_RUNTIME === 'edge') {
+      PostCache.resetInstance();
+    }
+    
     await postCache.initialize();
     
-    const { searchParams } = new URL(request.url);
+    // Ensure proper URL parsing in edge runtime
+    const url = request.url.startsWith('http') 
+      ? request.url 
+      : new URL(request.url, process.env.NEXT_PUBLIC_URL || 'http://localhost:3000').toString();
+    
+    const { searchParams } = new URL(url);
     const query = searchParams.get('q');
     const featured = searchParams.get('featured');
+    const slug = searchParams.get('slug');
+
+    // If requesting specific post content
+    if (slug) {
+      try {
+        const content = await postCache.getPostContent(slug);
+        return NextResponse.json({ content }, {
+          headers: {
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          }
+        });
+      } catch {
+        return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+      }
+    }
 
     const allPosts = postCache.getPosts();
     const now = new Date().toISOString();
@@ -23,7 +53,13 @@ export async function GET(request: Request) {
         .filter(post => !post.series)
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       
-      return NextResponse.json([...seriesPosts.slice(0, 2), ...recentPosts.slice(0, 2)]);
+      return NextResponse.json([...seriesPosts.slice(0, 2), ...recentPosts.slice(0, 2)], {
+        headers: {
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
     }
 
     if (query) {
@@ -32,15 +68,40 @@ export async function GET(request: Request) {
         const searchText = `${post.title} ${post.description} ${post.excerpt}`.toLowerCase();
         return searchTerms.every(term => searchText.includes(term));
       });
-      return NextResponse.json(filteredPosts);
+      return NextResponse.json(filteredPosts, {
+        headers: {
+          'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
     }
 
-    return NextResponse.json(publishedPosts);
+    return NextResponse.json(publishedPosts, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
   } catch (error) {
     console.error('Error in posts API:', error);
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+    
+    // Enhanced error handling for edge runtime
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const errorResponse = {
+      error: errorMessage,
+      timestamp: new Date().toISOString(),
+      path: request.url
+    };
+    
+    return NextResponse.json(errorResponse, { 
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
   }
 }

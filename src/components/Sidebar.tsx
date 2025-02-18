@@ -42,10 +42,10 @@ const PostItem = React.memo(({ data, index, style }: PostItemProps) => {
       role="option"
       aria-selected={isSelected}
       onFocus={() => onItemFocus(index)}
-      className={`block px-3 py-2 text-sm rounded-md transition-colors duration-150 min-h-[${ITEM_HEIGHT}px] focus:outline-none focus:ring-2 focus:ring-[var(--link)] focus-visible:ring-2 focus-visible:ring-[var(--link)] ${
+      className={`block px-3 py-2 text-sm rounded-md transition-all duration-200 ease-in-out min-h-[${ITEM_HEIGHT}px] focus:outline-none focus:ring-2 focus:ring-[var(--link)] focus-visible:ring-2 focus-visible:ring-[var(--link)] ${
         isSelected
           ? 'bg-[var(--selection)] text-[var(--foreground)] shadow-sm font-medium'
-          : 'hover:bg-[var(--background-muted)]'
+          : 'hover:bg-[var(--background-muted)] bg-transparent'
       }`}
       style={{
         ...style,
@@ -107,13 +107,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
     listRef.current?.scrollToItem(index, 'smart');
   };
 
-  // Scroll to current post when it changes
+  // Calculate current index and initial scroll position
+  const { currentIndex, initialScrollIndex } = useMemo(() => ({
+    currentIndex: filteredPosts.findIndex(post => post.slug === currentPost.slug),
+    initialScrollIndex: filteredPosts.findIndex(post => post.slug === currentPost.slug)
+  }), [filteredPosts, currentPost.slug]);
+
+  // Initialize scroll position
   useEffect(() => {
-    const currentIndex = filteredPosts.findIndex(post => post.slug === currentPost.slug);
-    if (currentIndex !== -1) {
-      listRef.current?.scrollToItem(currentIndex, 'smart');
+    if (initialScrollIndex !== -1 && listRef.current) {
+      listRef.current.scrollToItem(initialScrollIndex, 'smart');
     }
-  }, [currentPost.slug, filteredPosts]);
+  }, [initialScrollIndex]); // Include initialScrollIndex in deps array to properly handle updates
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -151,8 +156,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [isSearching, isHelpVisible]);
-
-  const currentIndex = filteredPosts.findIndex(post => post.slug === currentPost.slug);
 
   const sidebarContent = (
     <nav 

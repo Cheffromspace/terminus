@@ -36,7 +36,7 @@ export default async function RootLayout({
           <PostProvider initialAllPosts={allPosts}>
             <div className="flex min-h-screen">
               <ClientSidebar />
-              <div className="flex-1" style={{ marginLeft: 'calc(var(--sidebar-width) * var(--sidebar-visible))' }}>
+              <div className="flex-1 transition-[margin] duration-150 ease-out" style={{ marginLeft: 'calc(var(--sidebar-width) * var(--sidebar-visible))' }}>
                 <header className="border-b border-[var(--border)] py-4">
                   <nav className="container mx-auto px-4">
                     <div className="flex items-center justify-between">

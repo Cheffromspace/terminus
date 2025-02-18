@@ -144,7 +144,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
     if (lastKeyPress === 'g' && currentTime - lastKeyPressTime < 500) {
       // Double 'g' press within 500ms
       if (window.location.pathname.includes('/posts/')) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
       } else {
         navigateToItem(0);
         setNavState(prev => ({
@@ -164,7 +164,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
     if (window.location.pathname.includes('/posts/')) {
       window.scrollTo({ 
         top: document.documentElement.scrollHeight,
-        behavior: 'smooth'
+        behavior: 'instant'
       });
     } else {
       // Otherwise navigate to last post

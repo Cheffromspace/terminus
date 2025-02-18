@@ -2,6 +2,11 @@
 :root {
   background-color: var(--background) !important;
   color-scheme: dark light;
+  --theme-transition-duration: 200ms;
+  --theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --theme-transition-props: background-color var(--theme-transition-duration) var(--theme-transition-timing),
+                           color var(--theme-transition-duration) var(--theme-transition-timing),
+                           border-color var(--theme-transition-duration) var(--theme-transition-timing);
 }
 
 html {
@@ -20,7 +25,30 @@ body {
 
 /* Re-enable transitions after theme is loaded */
 [data-theme].theme-loaded * {
-  transition: background-color 0.2s ease-in-out,
-              color 0.2s ease-in-out,
-              border-color 0.2s ease-in-out !important;
+  transition: var(--theme-transition-props),
+              transform var(--theme-transition-duration) var(--theme-transition-timing),
+              margin var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* Optimize markdown heading transitions */
+[data-theme].theme-loaded h1,
+[data-theme].theme-loaded h2,
+[data-theme].theme-loaded h3,
+[data-theme].theme-loaded h4,
+[data-theme].theme-loaded h5,
+[data-theme].theme-loaded h6 {
+  will-change: color;
+  transition: color var(--theme-transition-duration) var(--theme-transition-timing) !important;
+}
+
+/* Ensure sidebar transitions are smooth */
+nav[aria-label="Blog navigation"] {
+  transition: transform var(--theme-transition-duration) var(--theme-transition-timing) !important;
+  will-change: transform;
+}
+
+/* Prevent layout shift during initial load */
+.flex-1[style*="margin-left"] {
+  transition: margin var(--theme-transition-duration) var(--theme-transition-timing);
+  will-change: margin-left;
 }

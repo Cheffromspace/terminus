@@ -1,23 +1,56 @@
 import type { Post } from '@/types/blog';
+import fs from 'fs/promises';
+import path from 'path';
+
+async function readManifest(): Promise<Post[]> {
+  try {
+    const manifestPath = path.join(process.cwd(), 'public', 'content', 'manifest.json');
+    const manifestContent = await fs.readFile(manifestPath, 'utf-8');
+    const manifest = JSON.parse(manifestContent);
+    return manifest.posts;
+  } catch (error) {
+    console.error('Error reading manifest:', error);
+    return [];
+  }
+}
+
+async function readPostContent(slug: string): Promise<string> {
+  try {
+    const contentPath = path.join(process.cwd(), 'public', 'content', `${slug}.json`);
+    const contentJson = await fs.readFile(contentPath, 'utf-8');
+    const content = JSON.parse(contentJson);
+    return content.preRenderedHtml;
+  } catch (error) {
+    console.error(`Error reading post content for ${slug}:`, error);
+    return '';
+  }
+}
 
 export async function getStaticPosts(): Promise<Post[]> {
-  const cache = (await import('./post-cache')).postCache;
-  await cache.initialize();
-  return cache.getPosts();
+  const posts = await readManifest();
+  // Load content for each post
+  return Promise.all(posts.map(async (post) => ({
+    ...post,
+    content: await readPostContent(post.slug)
+  })));
 }
 
 export async function getStaticPostBySlug(slug: string): Promise<Post | null> {
-  const cache = (await import('./post-cache')).postCache;
-  await cache.initialize();
-  const posts = cache.getPosts();
-  return posts.find(post => post.slug === slug) || null;
+  const posts = await readManifest();
+  const post = posts.find(post => post.slug === slug);
+  if (!post) return null;
+  
+  // Load content for the specific post
+  const content = await readPostContent(slug);
+  return {
+    ...post,
+    content
+  };
 }
 
 export async function getStaticPreviousAndNextPosts(currentSlug: string): Promise<{ previous: Post | null; next: Post | null }> {
   try {
-    const cache = (await import('./post-cache')).postCache;
-    await cache.initialize();
-    const posts = cache.getPosts();
+    const posts = await readManifest();
     const currentIndex = posts.findIndex(post => post.slug === currentSlug);
     
     if (currentIndex === -1) {
@@ -35,9 +68,7 @@ export async function getStaticPreviousAndNextPosts(currentSlug: string): Promis
 }
 
 export async function getFeaturedStaticPosts(): Promise<Post[]> {
-  const cache = (await import('./post-cache')).postCache;
-  await cache.initialize();
-  const allPosts = cache.getPosts();
+  const allPosts = await readManifest();
   const publishedPosts = filterPublishedPosts(allPosts);
   const seriesPosts = publishedPosts.filter(post => post.series);
   const recentPosts = publishedPosts
