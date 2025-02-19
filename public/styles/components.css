@@ -56,12 +56,6 @@
     opacity: 0.9;
   }
 
-  /* Navigation buttons */
-  .nav-button {
-    contain: layout style;
-    will-change: opacity, background-color;
-  }
-
   /* Theme selector */
   .theme-selector {
     contain: layout style;

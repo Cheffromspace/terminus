@@ -105,7 +105,7 @@ export function ThemeProvider({
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  }, [currentTheme]);
 
   const setTheme = (themeName: ThemeName) => {
     const newTheme = themes[themeName];
@@ -137,20 +137,38 @@ export function ThemeProvider({
     >
       <div className={styles.theme}>
         {children}
-        <div className={styles.themeSelector}>
-          <div className={styles.themePreview} style={{ backgroundColor: currentTheme.palette.background }} />
+        <div 
+          className={styles.themeSelector}
+          role="region"
+          aria-label="Theme settings"
+        >
+          <div 
+            className={styles.themePreview} 
+            style={{ backgroundColor: currentTheme.palette.background }} 
+            aria-hidden="true"
+          />
           <select
             value={currentTheme.metadata.name}
             onChange={(e) => setTheme(e.target.value as ThemeName)}
             className={styles.themeSelect}
-            aria-label="Select theme"
+            aria-label={`Current theme: ${currentTheme.metadata.displayName}. Press Enter to change theme.`}
+            role="combobox"
+            aria-expanded="false"
           >
             {Object.values(themes).map((theme: Theme) => (
-              <option key={theme.metadata.name} value={theme.metadata.name}>
+              <option 
+                key={theme.metadata.name} 
+                value={theme.metadata.name}
+                aria-selected={theme.metadata.name === currentTheme.metadata.name}
+              >
                 {theme.metadata.displayName}
+                {theme.metadata.isDark ? ' (Dark theme)' : ' (Light theme)'}
               </option>
             ))}
           </select>
+          <div className="sr-only" role="status" aria-live="polite">
+            {`Selected theme: ${currentTheme.metadata.displayName}`}
+          </div>
         </div>
       </div>
     </ThemeContext.Provider>

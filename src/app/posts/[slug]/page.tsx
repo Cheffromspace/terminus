@@ -3,6 +3,7 @@ import { getStaticPosts, getStaticPostBySlug } from '@/utils/server-posts';
 import { PostUpdater } from '@/components/PostUpdater';
 import { Metadata } from 'next';
 import React from 'react';
+import type { Post } from '@/types/blog';
 
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   const posts = await getStaticPosts();
@@ -63,7 +64,7 @@ export async function generateMetadata({
 }
 
 // Add structured data for the blog post
-function generateStructuredData(post: any) {
+function generateStructuredData(post: Post) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
