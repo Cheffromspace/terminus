@@ -59,6 +59,12 @@ logs/
 # Build output
 /dist/
 /lib/
+/scripts-dist/
+/scripts/dist/
+*.js
+!*.config.js
+!postcss.config.js
+!tailwind.config.js
 
 # Local content
 /local/
