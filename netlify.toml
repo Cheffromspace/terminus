@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && npm run build"
+  command = "npm install && npm run build:css && npm run build:content && npm run build"
   publish = ".next"
   environment = { NODE_VERSION = "20" }
 
