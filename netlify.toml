@@ -22,3 +22,8 @@
 
 [build.processing.images]
   compress = true
+
+[[headers]]
+  for = "/_next/static/css/*"
+  [headers.values]
+    Content-Type = "text/css"
