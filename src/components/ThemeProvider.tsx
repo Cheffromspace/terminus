@@ -13,8 +13,8 @@ const themes: Record<ThemeName, Theme> = {
 };
 
 const getInitialTheme = (): Theme => {
-  // Always return tokyo-night for initial SSR to prevent hydration mismatch
-  return tokyoNight;
+  // Always return gruvbox-light for initial SSR to ensure WCAG 2.1 compliance
+  return gruvboxLight;
 };
 
 const getClientTheme = (): Theme => {
@@ -23,9 +23,10 @@ const getClientTheme = (): Theme => {
     if (stored && stored in themes) return themes[stored];
 
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return systemDark ? tokyoNight : gruvboxLight;
+    // Use Gruvbox variants as defaults for better accessibility
+    return systemDark ? gruvboxDark : gruvboxLight;
   } catch {
-    return tokyoNight;
+    return gruvboxLight;
   }
 };
 
@@ -96,7 +97,7 @@ export function ThemeProvider({
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
       if (!localStorage.getItem('preferred-theme')) {
-        const newTheme = e.matches ? tokyoNight : gruvboxLight;
+        const newTheme = e.matches ? gruvboxDark : gruvboxLight;
         setCurrentTheme(newTheme);
         applyTheme(newTheme);
       }

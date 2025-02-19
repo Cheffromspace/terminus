@@ -18,7 +18,7 @@ export const gruvboxDark: Theme = {
     
     // UI colors
     border: '#1d2021',
-    comment: '#928374',
+    comment: '#a89984', // Brightened for better contrast
     link: '#83a598',
     
     // Syntax colors
@@ -70,7 +70,7 @@ export const gruvboxLight: Theme = {
     
     // UI colors
     border: '#ebdbb2',
-    comment: '#928374',
+    comment: '#504945', // Darkened for better contrast in light theme
     link: '#076678',
     
     // Syntax colors
