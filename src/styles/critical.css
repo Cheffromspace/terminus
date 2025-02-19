@@ -4,7 +4,7 @@
 @layer base {
   :root {
     /* Layout variables */
-    --sidebar-width: 18rem;
+    --sidebar-width: 16rem;
     --sidebar-visible: 1;
     color-scheme: light dark;
 
@@ -25,6 +25,32 @@
     background: var(--background);
     font-family: Arial, Helvetica, sans-serif;
     contain: content;
+    overflow-x: hidden; /* Prevent horizontal scrollbar during transitions */
+  }
+
+  /* Layout styles */
+  .content-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    margin-left: var(--sidebar-width);
+    transition: margin-left 150ms ease-out;
+    contain: paint;
+  }
+
+  .content-container {
+    margin: 0 auto;
+    margin-left: 4rem;
+    padding: 0 1.5rem;
+    max-width: 1200px;
+  }
+
+  /* When sidebar is hidden */
+  body[style*="--sidebar-visible:0"] .content-wrapper {
+    margin-left: 0;
+  }
+
+  body[style*="--sidebar-visible:0"] .content-container {
+    margin-left: auto;
   }
 
   /* Common elements */

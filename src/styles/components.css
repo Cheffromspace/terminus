@@ -67,4 +67,25 @@
     contain: layout style;
     will-change: transform;
   }
+
+  /* Sidebar navigation items */
+  .sidebar-nav-item {
+    @apply block px-3 py-2 text-sm rounded-md transition-all duration-200 ease-in-out;
+    @apply focus:outline-none focus:ring-2 focus:ring-[var(--link)] focus-visible:ring-2 focus-visible:ring-[var(--link)];
+    @apply border-l-4 border-l-transparent;
+    background-color: transparent;
+    min-height: 64px;
+  }
+
+  .sidebar-nav-item:hover {
+    @apply border-l-[var(--border)] bg-[var(--background-muted)];
+  }
+
+  .sidebar-nav-item.selected {
+    @apply bg-[var(--selection)] text-[var(--foreground)] shadow-sm font-medium border-l-[var(--link)];
+  }
+
+  .sidebar-nav-item.selected:hover {
+    @apply bg-[var(--selection)];
+  }
 }

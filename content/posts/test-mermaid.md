@@ -28,5 +28,5 @@ sequenceDiagram
     participant API
     User -> Blog: View Post
     Blog -> API: Fetch Content
-    API --> Blog: Return Content
+    API --> Blog: Return Contentm
 ```

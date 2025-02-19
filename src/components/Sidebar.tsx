@@ -44,11 +44,7 @@ const PostItem = React.memo(({ data, index, style }: PostItemProps) => {
       role="option"
       aria-selected={isSelected}
       onFocus={() => onItemFocus(index)}
-      className={`block px-3 py-2 text-sm rounded-md transition-all duration-200 ease-in-out min-h-[${ITEM_HEIGHT}px] focus:outline-none focus:ring-2 focus:ring-[var(--link)] focus-visible:ring-2 focus-visible:ring-[var(--link)] ${
-        isSelected
-          ? 'bg-[var(--selection)] text-[var(--foreground)] shadow-sm font-medium'
-          : 'hover:bg-[var(--background-muted)] bg-transparent'
-      }`}
+      className={`sidebar-nav-item ${isSelected ? 'selected' : ''}`}
       style={{
         ...style,
         top: `${parseFloat(style.top as string) + ITEM_PADDING}px`,
@@ -85,8 +81,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }, [defaultVisible]);
 
   useEffect(() => {
+    document.body.style.setProperty('--sidebar-visible', isSidebarVisible ? '1' : '0');
     onVisibilityChange?.(isSidebarVisible);
   }, [isSidebarVisible, onVisibilityChange]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const listRef = useRef<List>(null);
@@ -179,8 +177,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarContent = (
     <nav 
-      className={`fixed left-0 top-0 h-screen w-72 bg-[var(--background)] border-r border-[var(--border)] transform transition-transform duration-150 ease-out ${
-        isSidebarVisible ? 'translate-x-0' : '-translate-x-72'
+      className={`fixed left-0 top-0 h-screen w-[var(--sidebar-width)] bg-[var(--background)] bg-opacity-95 backdrop-blur-sm border-r border-[var(--border)] transition-transform duration-150 ease-out z-50 ${
+        isSidebarVisible ? 'translate-x-0' : '-translate-x-full'
       } ${className || ''}`}
       aria-label="Site navigation"
     >
@@ -195,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Toggle Button */}
       <button
         onClick={() => setIsSidebarVisible(prev => !prev)}
-        className="fixed left-72 top-4 p-2 bg-[var(--background)] border border-[var(--border)] rounded-r-lg shadow-sm hover:bg-[var(--selection)] transition-colors duration-150 z-10"
+        className={`fixed ${isSidebarVisible ? 'left-[var(--sidebar-width)]' : 'left-0'} top-4 p-2 bg-[var(--background)] border border-[var(--border)] rounded-r-lg shadow-sm hover:bg-[var(--selection)] transition-all duration-150 z-[51]`}
         aria-label={`${isSidebarVisible ? 'Hide' : 'Show'} sidebar (Press \` to toggle)`}
       >
         <svg
@@ -271,11 +269,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   role="option"
                   aria-selected={isSelected}
                   onFocus={() => handleItemFocus(index)}
-                  className={`block px-3 py-2 text-sm rounded-md transition-all duration-200 ease-in-out min-h-[${ITEM_HEIGHT}px] focus:outline-none focus:ring-2 focus:ring-[var(--link)] focus-visible:ring-2 focus-visible:ring-[var(--link)] ${
-                    isSelected
-                      ? 'bg-[var(--selection)] text-[var(--foreground)] shadow-sm font-medium'
-                      : 'hover:bg-[var(--background-muted)] bg-transparent'
-                  }`}
+                  className={`sidebar-nav-item ${isSelected ? 'selected' : ''}`}
                   style={{
                     ...style,
                     top: `${parseFloat(style.top as string) + ITEM_PADDING}px`,

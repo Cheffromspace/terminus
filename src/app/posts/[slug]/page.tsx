@@ -47,38 +47,36 @@ export default async function PostPage({
           previousPost={previous}
           nextPost={next}
         />
-        <div className="w-full mb-8">
+        <div className="mb-8">
           <NavigationButtons previous={previous} next={next} />
         </div>
-        <div className="max-w-4xl">
-          <article>
-            <header className="mb-8">
-              <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
-              {post.series && (
-                <p className="text-gray-600 dark:text-gray-400">
-                  {post.series.name} - Part {post.series.order} of {post.series.totalParts}
-                </p>
-              )}
-            </header>
-            <MarkdownRenderer 
-              content={post.content} 
-              frontmatter={{
-                title: post.title,
-                date: post.date,
-                description: post.description,
-                series: post.series,
-                draft: post.draft,
-                excerpt: post.excerpt
-              }} 
-            />
-          </article>
-        </div>
+        <article>
+          <header className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
+            {post.series && (
+              <p className="text-gray-600 dark:text-gray-400">
+                {post.series.name} - Part {post.series.order} of {post.series.totalParts}
+              </p>
+            )}
+          </header>
+          <MarkdownRenderer 
+            content={post.content} 
+            frontmatter={{
+              title: post.title,
+              date: post.date,
+              description: post.description,
+              series: post.series,
+              draft: post.draft,
+              excerpt: post.excerpt
+            }} 
+          />
+        </article>
       </>
     );
   } catch (error) {
     console.error('Error reading post:', error);
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div>
         <h1 className="text-2xl font-bold text-red-600">Error Loading Post</h1>
         <p className="mt-4">Sorry, we couldn&apos;t load the requested post.</p>
       </div>
