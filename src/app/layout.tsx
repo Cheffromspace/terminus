@@ -14,8 +14,40 @@ const inter = Inter({ subsets: ['latin'] });
 
 
 export const metadata: Metadata = {
-  title: 'Jonathan Flatt',
-  description: 'DevOps engineer writing about tooling, automation, and AI-assisted development',
+  metadataBase: new URL('https://jonathanflatt.dev'),
+  title: {
+    default: 'Jonathan Flatt',
+    template: '%s | Jonathan Flatt'
+  },
+  description: 'DevOps engineer writing about tooling, automation, and AI-assisted development. Exploring the intersection of DevOps, AI, and modern development practices.',
+  keywords: ['DevOps', 'automation', 'AI', 'development', 'tooling', 'software engineering', 'salesforce'],
+  authors: [{ name: 'Jonathan Flatt' }],
+  creator: 'Jonathan Flatt',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://jonathanflatt.dev',
+    siteName: 'Jonathan Flatt',
+    title: 'Jonathan Flatt - DevOps Engineer',
+    description: 'DevOps engineer writing about tooling, automation, and AI-assisted development. Exploring the intersection of DevOps, AI, and modern development practices.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://jonathanflatt.dev',
+    types: {
+      'application/rss+xml': 'https://jonathanflatt.dev/feed.xml',
+    },
+  }
 };
 
 
@@ -29,6 +61,21 @@ export default async function RootLayout({
     <html lang="en">
       <head>
         <meta name="color-scheme" content="light dark" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="alternate" type="application/rss+xml" title="RSS Feed for jonathanflatt.dev" href="/feed.xml" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "name": "Jonathan Flatt",
+            "url": "https://jonathanflatt.dev",
+            "jobTitle": "DevOps Engineer",
+            "description": "DevOps engineer writing about tooling, automation, and AI-assisted development",
+            "sameAs": [
+              "https://github.com/cheffromspace"
+            ]
+          })}
+        </script>
       </head>
       <body className={`${inter.className} antialiased`} style={{ '--sidebar-visible': '1' } as React.CSSProperties}>
         <ThemeProvider>

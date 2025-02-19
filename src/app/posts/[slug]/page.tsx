@@ -1,7 +1,6 @@
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
-import { getStaticPosts, getStaticPostBySlug, getStaticPreviousAndNextPosts } from '@/utils/server-posts';
+import { getStaticPosts, getStaticPostBySlug } from '@/utils/server-posts';
 import { PostUpdater } from '@/components/PostUpdater';
-import { NavigationButtons } from '@/components/NavigationButtons';
 import { Metadata } from 'next';
 import React from 'react';
 
@@ -21,10 +20,73 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
-    const post = await getStaticPostBySlug(resolvedParams.slug);
+  const post = await getStaticPostBySlug(resolvedParams.slug);
+  
+  if (!post) {
+    return {
+      title: 'Post Not Found',
+      description: 'The requested blog post could not be found.'
+    };
+  }
+
+  const publishedTime = new Date(post.date).toISOString();
+  // Calculate reading time (rough estimate: 200 words per minute)
+  const wordCount = post.content.split(/\s+/).length;
+  const readingTime = Math.ceil(wordCount / 200);
+  
   return {
-    title: post?.title,
-    description: post?.description
+    title: post.title,
+    description: post.description,
+    keywords: post.tags || [],
+    authors: [{ name: 'Jonathan Flatt' }],
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: 'article',
+      publishedTime,
+      authors: ['Jonathan Flatt'],
+      tags: post.tags,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.description,
+    },
+    alternates: {
+      canonical: `https://jonathanflatt.dev/posts/${post.slug}`,
+    },
+    other: {
+      'article:published_time': publishedTime,
+      'reading-time': `${readingTime} min read`,
+    }
+  };
+}
+
+// Add structured data for the blog post
+function generateStructuredData(post: any) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description: post.description,
+    author: {
+      '@type': 'Person',
+      name: 'Jonathan Flatt',
+      url: 'https://jonathanflatt.dev'
+    },
+    datePublished: new Date(post.date).toISOString(),
+    dateModified: new Date(post.date).toISOString(),
+    publisher: {
+      '@type': 'Person',
+      name: 'Jonathan Flatt',
+      url: 'https://jonathanflatt.dev'
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://jonathanflatt.dev/posts/${post.slug}`
+    },
+    keywords: post.tags?.join(', '),
+    articleBody: post.excerpt || post.description
   };
 }
 
@@ -38,21 +100,33 @@ export default async function PostPage({
     if (!post) {
       throw new Error(`Post not found: ${slug}`);
     }
-    const { previous, next } = await getStaticPreviousAndNextPosts(slug);
-
     return (
       <>
         <PostUpdater
           currentPost={post}
-          previousPost={previous}
-          nextPost={next}
+          previousPost={null}
+          nextPost={null}
         />
-        <div className="mb-8">
-          <NavigationButtons previous={previous} next={next} />
-        </div>
-        <article>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateStructuredData(post))
+          }}
+        />
+        <article className="h-entry">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">{post.title}</h1>
+            <h1 className="text-3xl font-bold mb-2 p-name">{post.title}</h1>
+            <div className="text-[var(--comment)] mb-4">
+              <time className="dt-published" dateTime={new Date(post.date).toISOString()}>
+                {new Date(post.date).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </time>
+              {' · '}
+              <span>{Math.ceil(post.content.split(/\s+/).length / 200)} min read</span>
+            </div>
             {post.series && (
               <p className="text-gray-600 dark:text-gray-400">
                 {post.series.name} - Part {post.series.order} of {post.series.totalParts}

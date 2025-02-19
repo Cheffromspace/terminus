@@ -1,12 +1,54 @@
 import React from "react";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About Me | Jonathan Flatt',
+  description: 'DevOps engineer specializing in developer tooling, automation, and AI-assisted development. Creating efficient and ergonomic solutions for modern development workflows.',
+  openGraph: {
+    title: 'About Me | Jonathan Flatt',
+    description: 'DevOps engineer specializing in developer tooling, automation, and AI-assisted development.',
+    type: 'profile',
+    url: 'https://jonathanflatt.dev/about',
+  },
+  alternates: {
+    canonical: 'https://jonathanflatt.dev/about',
+  }
+};
 
 export default function AboutPage(): React.ReactElement {
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-5xl font-bold mb-8">About Me</h1>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Person',
+            name: 'Jonathan Flatt',
+            jobTitle: 'DevOps Engineer',
+            description: 'DevOps engineer specializing in developer tooling, automation, and AI-assisted development.',
+            url: 'https://jonathanflatt.dev',
+            sameAs: [
+              'https://github.com/chefFromSpace'
+            ],
+            knowsAbout: [
+              'DevOps',
+              'Automation',
+              'CI/CD',
+              'Infrastructure as Code',
+              'AI-Assisted Development',
+              'Developer Experience',
+              'System Design',
+              'Salesforce'
+            ]
+          })
+        }}
+      />
+      <div className="max-w-4xl mx-auto h-card">
+      <h1 className="p-name text-5xl font-bold mb-8">About Me</h1>
       
       <section className="mb-12">
-        <p className="text-lg text-[var(--comment)] mb-6">
+        <p className="p-note text-lg text-[var(--comment)] mb-6">
           I&apos;m a DevOps engineer passionate about creating bespoke tooling that enhances 
           developer workflows. My focus lies at the intersection of ergonomic design 
           and efficient automation, with a particular interest in leveraging AI to 
@@ -22,8 +64,8 @@ export default function AboutPage(): React.ReactElement {
       <section className="mb-12">
         <h2 className="text-3xl font-semibold mb-6">Areas of Focus</h2>
         <div className="grid gap-6 md:grid-cols-2">
-          <div className="p-6 border border-[var(--border)] rounded-lg">
-            <h3 className="text-xl font-medium mb-4">DevOps & Tooling</h3>
+          <div className="p-6 border border-[var(--border)] rounded-lg" itemScope itemType="https://schema.org/ItemList">
+            <h3 className="text-xl font-medium mb-4" itemProp="name">DevOps & Tooling</h3>
             <ul className="space-y-2 text-[var(--comment)]">
               <li>• Custom Development Tools</li>
               <li>• Automation Workflows</li>
@@ -31,8 +73,8 @@ export default function AboutPage(): React.ReactElement {
               <li>• Infrastructure as Code</li>
             </ul>
           </div>
-          <div className="p-6 border border-[var(--border)] rounded-lg">
-            <h3 className="text-xl font-medium mb-4">AI & Development</h3>
+          <div className="p-6 border border-[var(--border)] rounded-lg" itemScope itemType="https://schema.org/ItemList">
+            <h3 className="text-xl font-medium mb-4" itemProp="name">AI & Development</h3>
             <ul className="space-y-2 text-[var(--comment)]">
               <li>• AI-Assisted Development</li>
               <li>• Developer Experience</li>
@@ -54,8 +96,8 @@ export default function AboutPage(): React.ReactElement {
           <a
             href="https://github.com/chefFromSpace"
             target="_blank"
-            rel="noopener noreferrer"
-            className="px-6 py-3 border border-[var(--border)] rounded-lg hover:border-[var(--accent)] transition-colors"
+            rel="noopener noreferrer me"
+            className="u-url px-6 py-3 border border-[var(--border)] rounded-lg hover:border-[var(--accent)] transition-colors"
             data-nav-item
           >
             GitHub Profile
@@ -63,5 +105,6 @@ export default function AboutPage(): React.ReactElement {
         </div>
       </section>
     </div>
+    </>
   );
 }
